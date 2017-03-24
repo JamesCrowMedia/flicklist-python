@@ -43,7 +43,16 @@ class Index(webapp2.RequestHandler):
         <form action="/cross-off" method="post">
             <label>
                  I want to cross off
-                <input type="text" name="crossed-movie"/>
+                <select name="crossed-movie">
+                    <option selected disabled>Choose one</option>
+                    <option value="Movie 1">Movie 1</option>
+                    <option value="Movie 2">Movie 2</option>
+                    <option value="Movie 3">Movie 3</option>
+                    <option value="Movie 4">Movie 4</option>
+                    <option value="Movie 5">Movie 5</option>
+                    <option value="Movie 6">Movie 6</option>
+                    <option value="Movie 7">Movie 7</option>
+                </select>
                  from my Watchlist.
             </label>
             <input type="submit" value="Cross It Off"/>
