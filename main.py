@@ -184,9 +184,13 @@ class Index(webapp2.RequestHandler):
 
         # if we have an error, make a <p> to display it
         error = self.request.get("error")
+        terribleMovie = self.request.get("terribleMovie")
         if error:
             error_esc = cgi.escape(error, quote=True)
             error_element = '<p class="error">' + error_esc + '</p>'
+        elif terribleMovie:
+            error_esc = cgi.escape(error, quote=True)
+            error_element = "You don't want to watch {0}, I promise.".format("<strong>" + terribleMovie + "</strong>")
         else:
             error_element = ''
 
@@ -213,8 +217,7 @@ class AddMovie(webapp2.RequestHandler):
         # TODO 3
         # if the user wants to add a terrible movie, redirect and yell at them
         elif new_movie in getDoNotWatchList():
-            error = "You don't want to watch {0}, I promise.".format(new_movie)
-            self.redirect("/?error=" + error)
+            self.redirect("/?terribleMovie=" + new_movie)
 
         # TODO 1
         # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
