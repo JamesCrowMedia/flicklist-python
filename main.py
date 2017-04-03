@@ -19,7 +19,7 @@ page_header = """
             width: 580px;
             height: 300px;
             margin: auto;
-            margin-top: 20%;
+            margin-top: 100px;
         }
 
         h1 {
@@ -156,7 +156,7 @@ class Index(webapp2.RequestHandler):
         <form action="/add" method="post">
             <label>
                 I want to add
-                <input type="text" name="new-movie"/>
+                <input type="text" name="new-movie" value="{0}"/>
                 to my watchlist.
             </label>
             <input type="submit" class="submit" value="Add It"/>
@@ -191,8 +191,11 @@ class Index(webapp2.RequestHandler):
         elif terribleMovie:
             error_esc = cgi.escape(error, quote=True)
             error_element = "You don't want to watch {0}, I promise.".format("<strong>" + terribleMovie + "</strong>")
+            add_form = add_form.format(terribleMovie)
         else:
             error_element = ''
+            add_form = add_form.format('')
+
 
         # combine all the pieces to build the content of our response
         main_content = edit_header + add_form + crossoff_form + error_element
