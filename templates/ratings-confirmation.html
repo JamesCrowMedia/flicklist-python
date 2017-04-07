@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+    <strong>{{ movie }}</strong> has been given
+    <span>
+    {% for n in range( rating|int ) %}
+    &#9733;
+    {% endfor %}
+    </span>
+     stars.
+</p>
+{% endblock %}

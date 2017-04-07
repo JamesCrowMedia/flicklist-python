@@ -23,6 +23,19 @@
             - a hidden input to tell the back-end which movie we are rating
             - a submit button that says "Rate it!"
         -->
+        <form action="/ratings" method="post">
+            <input type="hidden" name="rated-movie" value="{{ movie }}"/>
+            <select name="rating">
+                <option value="" selected="true" disabled="disabled">How was it?</option>
+                <option value="1">&#9733;</option>
+                <option value="2">&#9733;&#9733;</option>
+                <option value="3">&#9733;&#9733;&#9733;</option>
+                <option value="4">&#9733;&#9733;&#9733;&#9733;</option>
+                <option value="5">&#9733;&#9733;&#9733;&#9733;&#9733;</option>
+            </select>
+            <input type="submit" value="Rate it!"/>
+        </form>
+
     </li>
 {% endfor %}
 </ul>
