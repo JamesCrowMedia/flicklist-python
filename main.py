@@ -1,4 +1,4 @@
-import webapp2, cgi, jinja2, os, re
+import webapp2, cgi, jinja2, os, re, hashutils
 from google.appengine.ext import db
 from datetime import datetime
 
@@ -54,10 +54,11 @@ class Handler(webapp2.RequestHandler):
     def read_cookie(self, name):
         val = self.request.cookies.get(name)
         if val:
-            return val
+            return hashutils.check_secure_val(val)
 
     def set_cookie(self, name, val):
-        self.response.headers.add('Set-Cookie', '%s=%s; Path=/' % (name, val))
+        cookie_val = hashutils.make_secure_val(val)
+        self.response.headers.add('Set-Cookie', '%s=%s; Path=/' % (name, cookie_val))
 
     def login_user(self, user):
         user_id = user.key().id()
@@ -85,16 +86,20 @@ class Index(Handler):
     def get(self):
         """ Display the homepage (the list of unwatched movies) """
 
-        query = Movie.all().filter("owner", self.user).filter("watched", False)
-        unwatched_movies = query.run()
+        user_id = self.read_cookie('user_id')
 
-        t = jinja_env.get_template("frontpage.html")
-        content = t.render(
-                        movies = unwatched_movies,
-                        error = self.request.get("error"),
-                        message = self.request.get("message"))
-        self.response.write(content)
+        if user_id:
+            query = Movie.all().filter("owner", self.user).filter("watched", False)
+            unwatched_movies = query.run()
 
+            t = jinja_env.get_template("frontpage.html")
+            content = t.render(
+                            movies = unwatched_movies,
+                            error = self.request.get("error"),
+                            message = self.request.get("message"))
+            self.response.write(content)
+        else:
+            self.redirect("/login")
 
 class AddMovie(Handler):
     """ Handles requests coming in to '/add'
@@ -164,12 +169,17 @@ class MovieRatings(Handler):
     def get(self):
         """ Show a list of the movies the user has already watched """
 
-        query = Movie.all().filter("owner", self.user).filter("watched", True)
-        watched_movies = query.run()
+        user_id = self.read_cookie('user_id')
 
-        t = jinja_env.get_template("ratings.html")
-        content = t.render(movies = watched_movies)
-        self.response.write(content)
+        if user_id:
+            query = Movie.all().filter("owner", self.user).filter("watched", True)
+            watched_movies = query.run()
+
+            t = jinja_env.get_template("ratings.html")
+            content = t.render(movies = watched_movies)
+            self.response.write(content)
+        else:
+            self.redirect("/login")
 
     def post(self):
         """ User wants to rate a movie """
@@ -226,7 +236,7 @@ class Login(Handler):
         user = self.get_user_by_name(submitted_username)
         if not user:
             self.render_login_form(error = "Invalid username")
-        elif submitted_password != user.password:
+        elif not hashutils.valid_pw(submitted_username, submitted_password, user.password):
             self.render_login_form(error = "Invalid password")
         else:
             self.login_user(user)
@@ -293,7 +303,8 @@ class Register(Handler):
             has_error = True
         elif (username and password and verify):
             # create new user object
-            user = User(username=username, password=password)
+            pw_hash = hashutils.make_pw_hash(username, password)
+            user = User(username=username, password=pw_hash)
             user.put()
         else:
             has_error = True
